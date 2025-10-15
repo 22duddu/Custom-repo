@@ -1,6 +1,6 @@
 #(©)Codexbotz
 
-import asyncio
+import asyncio, sys, os, subprocess
 from pyrogram import filters, Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait
@@ -32,3 +32,31 @@ async def channel_post(client: Client, message: Message):
 
     if not DISABLE_CHANNEL_BUTTON:
         await post_message.edit_reply_markup(reply_markup)
+
+@Bot.on_message(filters.command('update') & filters.private & admin)
+async def update_bot(client, message):
+    #if message.from_user.id != OWNER_ID:
+        #return await message.reply_text("You are not authorized to update the bot.")
+
+    try:
+        msg = await message.reply_text("<b><blockquote>Pulling the latest updates and restarting the bot...</blockquote></b>")
+
+        # Run git pull
+        git_pull = subprocess.run(["git", "pull"], capture_output=True, text=True)
+
+        if git_pull.returncode == 0:
+            await msg.edit_text(f"<b><blockquote>Updates pulled successfully:\n\n{git_pull.stdout}</blockquote></b>")
+        else:
+            await msg.edit_text(f"<b><blockquote>Failed to pull updates:\n\n{git_pull.stderr}</blockquote></b>")
+            return
+
+        await asyncio.sleep(3)
+
+        await msg.edit_text("<b><blockquote>✅ Bᴏᴛ ɪs ʀᴇsᴛᴀʀᴛɪɴɢ ɴᴏᴡ...</blockquote></b>")
+
+    except Exception as e:
+        await message.reply_text(f"An error occurred: {e}")
+        return
+
+    finally:
+        os.execl(sys.executable, sys.executable, *sys.argv)
