@@ -11,7 +11,7 @@ from helper_func import encode, admin
 
 @Bot.on_message(filters.private & admin & ~filters.command(['start', 'commands','users','broadcast','batch', 'custom_batch', 'genlink','stats', 'dlt_time', 'check_dlt_time', 'ban', 'unban', 'banlist', 'addchnl', 'delchnl', 'listchnl', 'fsub_mode', 'add_admin', 'deladmin', 'admins', 'delreq', 'cancel', 'setfile', 'listfile', 'delfile', 'update']))
 async def channel_post(client: Client, message: Message):
-
+    return
 
     """reply_text = await message.reply_text("Please Wait...!", quote = True)
     try:
