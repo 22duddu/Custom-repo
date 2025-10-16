@@ -31,16 +31,9 @@ class Rohit:
         self.rqst_fsub_data = self.database['request_forcesub']
         self.rqst_fsub_Channel_data = self.database['request_forcesub_channel']
         self.file_store = self.database['file_store']
-        
-# ======================
-# FILE STORE MANAGEMENT (Multi-file Support)
-# ======================
 
     async def add_file_to_key(self, key: str, chat_id: int, file_id: int):
-        """
-        Add or append a file to an existing key.
-        If key doesn't exist, create it.
-        """
+        """Add or append a file to an existing key. If key doesn't exist, create it."""
         await self.file_store.update_one(
             {"key": key},
             {
@@ -50,52 +43,12 @@ class Rohit:
             upsert=True
         )
 
-    async def set_file(self, key: str, chat_id: int, file_id: int):
-        """
-        Backward-compatible single file bind (used by /setfile legacy).
-        Converts older single file entries to list format internally.
-        """
-        existing = await self.file_store.find_one({"key": key})
-        if existing:
-            # If old structure, convert to list format
-            if "file_id" in existing:
-                await self.file_store.update_one(
-                    {"key": key},
-                    {
-                        "$set": {
-                            "chat_id": chat_id,
-                            "file_ids": [existing["file_id"], file_id]
-                        },
-                        "$unset": {"file_id": ""}
-                    }
-                )
-            else:
-                await self.file_store.update_one(
-                    {"key": key},
-                    {"$addToSet": {"file_ids": file_id}}
-                )
-        else:
-            await self.file_store.insert_one({
-                "key": key,
-                "chat_id": chat_id,
-                "file_ids": [file_id]
-            })
-
     async def get_file(self, key: str):
-        """
-        Fetch file record by key.
-        Always returns a consistent structure:
-        {
-          'key': '12',
-          'chat_id': 123456,
-          'file_ids': [111, 222, 333]
-        }
-        """
+        """Fetch file record by key. Always returns {key, chat_id, file_ids[]}"""
         data = await self.file_store.find_one({"key": key})
         if not data:
             return None
 
-        # Normalize old single-file entries
         if "file_id" in data:
             data["file_ids"] = [data["file_id"]]
             del data["file_id"]
@@ -106,17 +59,10 @@ class Rohit:
         return await self.file_store.delete_one({"key": key})
 
     async def list_files(self):
-        """
-        List all stored keys with file IDs.
-        Returns a list like:
-        [
-            {'key': '1', 'chat_id': 123, 'file_ids': [111, 112]},
-            {'key': '2', 'chat_id': 123, 'file_ids': [113]},
-        ]
-        """
+        """List all stored keys and files."""
         files = await self.file_store.find().to_list(length=None)
         for f in files:
-            if "file_id" in f:  # Normalize old entries
+            if "file_id" in f:
                 f["file_ids"] = [f["file_id"]]
                 del f["file_id"]
         return files
