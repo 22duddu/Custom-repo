@@ -14,8 +14,11 @@ import asyncio
 import os
 import random
 import sys
+import re
+import string 
+import string as rohit
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pyrogram import Client, filters, __version__
 from pyrogram.enums import ParseMode, ChatAction
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, ChatInviteLink, ChatPrivileges
@@ -25,8 +28,11 @@ from bot import Bot
 from config import *
 from helper_func import *
 from database.database import *
+from database.db_premium import *
+
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
+TUT_VID = f"{TUT_VID}"
 
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
