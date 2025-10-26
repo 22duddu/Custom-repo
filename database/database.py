@@ -48,8 +48,43 @@ class Rohit:
         self.fsub_data = self.database['fsub']   
         self.rqst_fsub_data = self.database['request_forcesub']
         self.rqst_fsub_Channel_data = self.database['request_forcesub_channel']
-        
+        self.file_store = self.database['file_store']
 
+    async def add_file_to_key(self, key: str, chat_id: int, file_id: int):
+        """Add or append a file to an existing key. If key doesn't exist, create it."""
+        await self.file_store.update_one(
+            {"key": key},
+            {
+                "$set": {"chat_id": chat_id},
+                "$addToSet": {"file_ids": file_id}
+            },
+            upsert=True
+        )
+
+    async def get_file(self, key: str):
+        """Fetch file record by key. Always returns {key, chat_id, file_ids[]}"""
+        data = await self.file_store.find_one({"key": key})
+        if not data:
+            return None
+
+        if "file_id" in data:
+            data["file_ids"] = [data["file_id"]]
+            del data["file_id"]
+        return data
+
+    async def delete_file(self, key: str):
+        """Delete all files bound to a key."""
+        return await self.file_store.delete_one({"key": key})
+
+    async def list_files(self):
+        """List all stored keys and files."""
+        files = await self.file_store.find().to_list(length=None)
+        for f in files:
+            if "file_id" in f:
+                f["file_ids"] = [f["file_id"]]
+                del f["file_id"]
+        return files
+        
 
     # USER DATA
     async def present_user(self, user_id: int):
