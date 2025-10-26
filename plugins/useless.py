@@ -300,48 +300,51 @@ async def send_saved_file(client: Bot, message: Message):
     verify_status = await db.get_verify_status(user_id)
 
     if SHORTLINK_URL or SHORTLINK_API:
-        # Check if token expired
-        if verify_status and verify_status.get("is_verified"):
-            if VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
-                await db.update_verify_status(user_id, is_verified=False)
+        # --- Create new token or refresh if expired ---
+        new_token_needed = False
+        if not verify_status:
+            new_token_needed = True
+        else:
+            if not verify_status.get("is_verified"):
+                new_token_needed = True
+            elif VERIFY_EXPIRE < (time.time() - verify_status.get("verified_time", 0)):
+                new_token_needed = True
 
-        # Handle verification callback
-        if "verify_" in message.text:
-            try:
-                _, token = message.text.split("_", 1)
-            except:
-                return await message.reply("⚠️ Invalid verification format. Try /start again.")
-
-            if verify_status["verify_token"] != token:
-                return await message.reply("⚠️ Invalid token. Please /start again.")
-
-            await db.update_verify_status(user_id, is_verified=True, verified_time=time.time())
-            return await message.reply(
-                f"✅ 𝗧𝗼𝗸𝗲𝗻 𝘃𝗲𝗿𝗶𝗳𝗶𝗲𝗱! Vᴀʟɪᴅ ғᴏʀ {get_exp_time(VERIFY_EXPIRE)}"
-            )
-
-        # If user not verified
-        if not verify_status or not verify_status.get("is_verified"):
+        # --- Generate new verification token ---
+        if new_token_needed:
             token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-            await db.update_verify_status(user_id, verify_token=token, link="")
+            await db.update_verify_status(user_id, verify_token=token, is_verified=False, verified_time=0)
             short_link = await get_shortlink(
                 SHORTLINK_URL,
                 SHORTLINK_API,
                 f'https://telegram.dog/{client.username}?start=verify_{token}'
             )
-
             btn = [
                 [InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ •", url=short_link),
                  InlineKeyboardButton("• ᴛᴜᴛᴏʀɪᴀʟ •", url=TUT_VID)],
                 [InlineKeyboardButton("• ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", callback_data="premium")]
             ]
             return await message.reply(
-                f"𝗬𝗼𝘂𝗿 𝘁𝗼𝗸𝗲𝗻 𝗵𝗮𝘀 𝗲𝘅𝗽𝗶𝗿𝗲𝗱 𝗼𝗿 𝗶𝘀 𝗺𝗶𝘀𝘀𝗶𝗻𝗴.\n\n"
-                f"<b>Tᴏᴋᴇɴ Tɪᴍᴇᴏᴜᴛ:</b> {get_exp_time(VERIFY_EXPIRE)}\n\n"
-                f"<b>ᴡʜᴀᴛ ɪs ᴛʜᴇ ᴛᴏᴋᴇɴ?</b>\n\n"
-                f"ᴛʜɪs ɪs ᴀɴ ᴀᴅ ᴛᴏᴋᴇɴ. ᴘᴀssɪɴɢ ᴏɴᴇ ᴀᴅ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ ᴜsᴇ ᴛʜᴇ ʙᴏᴛ ғᴏʀ {get_exp_time(VERIFY_EXPIRE)}",
+                f"⚠️ 𝗬𝗼𝘂𝗿 𝘁𝗼𝗸𝗲𝗻 𝗶𝘀 𝗺𝗶𝘀𝘀𝗶𝗻𝗴 𝗼𝗿 𝗲𝘅𝗽𝗶𝗿𝗲𝗱.\n\n"
+                f"<b>Token validity:</b> {get_exp_time(VERIFY_EXPIRE)}\n\n"
+                f"Pass one ad to unlock access for {get_exp_time(VERIFY_EXPIRE)}.",
                 reply_markup=InlineKeyboardMarkup(btn)
             )
+
+        # --- Handle verification ---
+        if "verify_" in message.text:
+            try:
+                _, token = message.text.split("_", 1)
+            except:
+                return await message.reply("⚠️ Invalid verification format. Try /start again.")
+
+            if verify_status and verify_status.get("verify_token") == token:
+                await db.update_verify_status(user_id, is_verified=True, verified_time=time.time())
+                return await message.reply(
+                    f"✅ Token verified! Vᴀʟɪᴅ ғᴏʀ {get_exp_time(VERIFY_EXPIRE)}"
+                )
+            else:
+                return await message.reply("⚠️ Invalid or expired token. Please /start again.")
 
     # 📁 Handle saved file sending
     data = await db.get_file(text)
@@ -351,10 +354,7 @@ async def send_saved_file(client: Bot, message: Message):
     try:
         sent_msgs = []
         for fid in data["file_ids"]:
-            sent = await client.send_cached_media(
-                chat_id=message.chat.id,
-                file_id=fid
-            )
+            sent = await client.send_cached_media(chat_id=message.chat.id, file_id=fid)
             sent_msgs.append(sent)
 
         if FILE_AUTO_DELETE > 0:
