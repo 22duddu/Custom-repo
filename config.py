@@ -18,19 +18,19 @@ from logging.handlers import RotatingFileHandler
 #rohit_1888 on Tg
 #--------------------------------------------
 #Bot token @Botfather
-TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "7942169109:AAHKxNMhvfA_tylPrfWuQ4ZaThTtKgBmnqw")
-APP_ID = int(os.environ.get("APP_ID", "22469064")) #Your API ID from my.telegram.org
-API_HASH = os.environ.get("API_HASH", "c05481978a217fdb11fa6774b15cba32") #Your API Hash from my.telegram.org
+TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "8340697651:AAGMolfwtjjoF0hUq0E2db5LYEl4JRKwg9Q")
+APP_ID = int(os.environ.get("APP_ID", "24314601")) #Your API ID from my.telegram.org
+API_HASH = os.environ.get("API_HASH", "ede341e2d490a0fad5469866dedf8a95") #Your API Hash from my.telegram.org
 #--------------------------------------------
 
-CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002170811388")) #Your db channel Id
-OWNER = os.environ.get("OWNER", "sewxiy") # Owner username without @
-OWNER_ID = int(os.environ.get("OWNER_ID", "7328629001")) # Owner id
+CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002784538461")) #Your db channel Id
+OWNER = os.environ.get("OWNER", "link_report01") # Owner username without @
+OWNER_ID = int(os.environ.get("OWNER_ID", "640617767")) # Owner id
 #--------------------------------------------
 PORT = os.environ.get("PORT", "8001")
 #--------------------------------------------
-DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://wuwamuqo_db_user:NfhgBOs7LeRbSI6S@cluster0.zxqopbx.mongodb.net/?retryWrites=true&w=majority")
-DB_NAME = os.environ.get("DATABASE_NAME", "Cluooo")
+DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://40duddududdu1:40duddududdu1@cluster0.8mlkqcu.mongodb.net/?appName=Cluster0")
+DB_NAME = os.environ.get("DATABASE_NAME", "cluster0")
 #--------------------------------------------
 FSUB_LINK_EXPIRY = int(os.getenv("FSUB_LINK_EXPIRY", "10"))  # 0 means no expiry
 BAN_SUPPORT = os.environ.get("BAN_SUPPORT", "https://t.me/CodeflixSupport")
@@ -40,8 +40,8 @@ START_PIC = os.environ.get("START_PIC", "https://telegra.ph/file/ec17880d61180d3
 FORCE_PIC = os.environ.get("FORCE_PIC", "https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg")
 #--------------------------------------------
 #--------------------------------------------
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "linkshortify.com")
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "75030042affaa59003346cb258e766b0fc490a3c")
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "hxlinks.com")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "e5ca4862a11c6f3c8894b7a5c2525c69fdf0f54c")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 120)) # Add time in seconds
 TUT_VID = os.environ.get("TUT_VID","https://t.me/hwdownload/3")
 #--------------------------------------------
